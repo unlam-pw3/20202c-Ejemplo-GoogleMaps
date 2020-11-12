@@ -1,0 +1,74 @@
+﻿@model List<_20202c_Ejemplo_GoogleMaps.Models.MarcadorGoogle>
+@{
+    ViewBag.Title = "VerMapa";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Ver Mapa</h2>
+
+@section TopScripts
+{
+    <style>
+        #map_canvas {
+            height: 400px;
+        }
+
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js"></script>
+
+    <script>
+    var marcadores = @Html.Raw(Json.Encode(Model));
+	//console.log(marcadores);
+
+    $(document).ready(function() {
+        // execute
+        (function() {
+            // map options
+            var options = {
+                zoom: 5,
+                center: new google.maps.LatLng(-30.7369959, -58.7870258),
+                mapTypeId: google.maps.MapTypeId.TERRAIN,
+                mapTypeControl: false
+            };
+
+            // init map
+            var map = new google.maps.Map(document.getElementById('map_canvas'), options);
+
+            var bounds = new google.maps.LatLngBounds();
+
+            for (var i = 0; i < marcadores.length; i++) {
+                // init markers
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng(marcadores[i].Lat, marcadores[i].Lng),
+                    map: map,
+                    title: marcadores[i].Titulo
+                });
+
+                var myPlace = new google.maps.LatLng(marcadores[i].Lat, marcadores[i].Lng);
+
+                bounds.extend(myPlace);
+
+                // process multiple info windows
+                (function(marker, i) {
+                    // add click event
+                    google.maps.event.addListener(marker, 'click', function() {
+                        infowindow = new google.maps.InfoWindow({
+                            content: marcadores[i].Titulo
+                        });
+                        infowindow.open(map, marker);
+                    });
+                })(marker, i);
+            }
+
+            map.fitBounds(bounds);
+
+        })();
+    });
+
+    </script>
+
+}
+
+<div id="map_canvas"></div>
+
+
